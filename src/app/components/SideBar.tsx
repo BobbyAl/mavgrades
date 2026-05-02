@@ -54,7 +54,7 @@ const SideBar: React.FC<SideBarProps> = ({
    selectedYear,
    selectedCourse,
    coursesToDisplay,
-   setCoursesToDisplay,
+   setCoursesToDisplay: _setCoursesToDisplay,
    setSelectedCourse,
    setSelectedYear,
    semesters,
@@ -160,25 +160,23 @@ const SideBar: React.FC<SideBarProps> = ({
 
 
    return (
-      <div className="flex flex-col lg:w-1/3 w-full mx-auto mt-4 mr-4 lg:mt-10 bg-gray-200 bg-opacity-10 rounded-lg min-w-[320px] overflow-hidden min-h-[460px]"> 
+      <div className="flex flex-col w-full h-full overflow-hidden">
          {routeType === "course" ? (
-            <div className="z-10 px-4 pt-4 sticky top-0">
+            <div className="z-10 sticky top-0 pb-4">
                <div className="align-middle flex mb-4">
-                  <span className="mr-5 text-white text-sm lg:text-base">Compare professors</span>
+                  <span className="mr-5 text-gray-900 dark:text-white text-sm">Compare professors</span>
                   <ToggleSwitch isEnabled={checkboxEnabled} onToggle={onToggle} />
                </div>
             </div>
-         ) : (
-            <div className="pt-4" />
-         )}
+         ) : null}
       
-         <div className="overflow-y-auto px-4 pb-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent h-[calc(100%-44px)] min-h-[400px]">
+         <div className="overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
             {routeType === "course" ? (
-               <ul className="space-y-2 lg:space-y-4">
+               <ul className="space-y-2">
                   {professors.slice().sort((a, b) => a.localeCompare(b)).map((professor, index) => (
                      <li
                         key={index}
-                        className="p-4 rounded-lg shadow-sm cursor-pointer bg-gray-200 bg-opacity-10"
+                        className="p-4 rounded-lg shadow-sm cursor-pointer bg-white dark:bg-[#0d0d0f] border border-black/[0.07] dark:border-white/[0.07]"
                         onClick={() => toggleProfessorAccordion(index, professor)}
                      >
                         <div className="flex items-center">
@@ -195,18 +193,23 @@ const SideBar: React.FC<SideBarProps> = ({
                               />
                            )}
                            <div className="flex justify-between items-center flex-1 cursor-pointer">
-                              <h2 className="text-sm lg:text-lg font-semibold text-white">
-                                 {professor}
-                              </h2>
-                              <span className="text-gray-300">
-                                 {openProfessorAccordion === index ? "-" : "+"}
+                              <div>
+                                 <h2 className="text-sm font-semibold text-gray-900 dark:text-white">{professor}</h2>
+                                 {openProfessorAccordion !== index && selectedProfessor === professor && selectedSection && (
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                       {selectedSection.semester} {selectedSection.year} · {selectedSection.section_number}
+                                    </p>
+                                 )}
+                              </div>
+                              <span className="text-gray-500 dark:text-gray-400 text-xs ml-2">
+                                 {openProfessorAccordion === index ? "−" : "+"}
                               </span>
                            </div>
                         </div>
       
                         {openProfessorAccordion === index && (
-                           <div 
-                              className="mt-2 bg-gray-200 bg-opacity-10 p-2 rounded-lg cursor-auto"
+                           <div
+                              className="mt-3 cursor-auto"
                               onClick={(event) => event.stopPropagation()}
                            >
                               <SelectionDropdowns
@@ -233,23 +236,30 @@ const SideBar: React.FC<SideBarProps> = ({
                   {coursesToDisplay.map((course, index) => (
                      <li
                         key={index}
-                        className="p-4 rounded-lg shadow-sm cursor-pointer bg-gray-200 bg-opacity-10"
+                        className="p-4 rounded-lg shadow-sm cursor-pointer bg-white dark:bg-[#0d0d0f] border border-black/[0.07] dark:border-white/[0.07]"
                         onClick={() => toggleCourseAccordion(index, `${course.subject_id} ${course.course_number}`)}
                      >
                         <div className="flex items-center">
                            <div className="flex justify-between items-center flex-1">
-                              <h2 className="text-lg font-semibold text-white">
-                                 {`${course.subject_id} ${course.course_number}`}
-                              </h2>
-                              <span className="text-gray-300">
-                                 {openCourseAccordion === index ? "-" : "+"}
+                              <div>
+                                 <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
+                                    {`${course.subject_id} ${course.course_number}`}
+                                 </h2>
+                                 {openCourseAccordion !== index && selectedSection && selectedCourse === `${course.subject_id} ${course.course_number}` && (
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                       {selectedSection.semester} {selectedSection.year} · {selectedSection.section_number}
+                                    </p>
+                                 )}
+                              </div>
+                              <span className="text-gray-500 dark:text-gray-400 text-xs ml-2">
+                                 {openCourseAccordion === index ? "−" : "+"}
                               </span>
                            </div>
                         </div>
       
                         {openCourseAccordion === index && (
-                           <div 
-                              className="mt-4 bg-gray-200 bg-opacity-10 p-4 rounded-lg cursor-auto"
+                           <div
+                              className="mt-3 cursor-auto"
                               onClick={(event) => event.stopPropagation()}
                            >
                               <SelectionDropdowns

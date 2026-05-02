@@ -1,27 +1,15 @@
 "use client";
 import { useEffect, useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { SlidersHorizontal, X } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import SearchBar from "../components/SearchBar";
 import SideBar, { Course } from "../components/SideBar";
-import { IoHomeOutline } from "react-icons/io5";
-import { BsQuestionCircle } from "react-icons/bs";
-import { Poppins, Montserrat } from "next/font/google";
 import StatsCard from "../components/StatsCard";
-// import Image from "next/image";
-
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-poppins",
-});
-const montserrat = Montserrat({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-montserrat",
-});
+import ProfessorRating from "../components/ProfessorRating";
+import { InteractiveGridPattern } from "../components/interactive-grid-pattern";
+import { cn } from "@/lib/utils";
 
 const ResultsContent = () => {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const course = searchParams.get("course");
   const professor = searchParams.get("professor");
@@ -184,38 +172,53 @@ const ResultsContent = () => {
     setCoursesToDisplay([]);
   };
 
+  const isComparingMode = selectedItems.size > 1;
+  const showRMP = !isComparingMode && !!selectedProfessor;
+  const [mobilePanel, setMobilePanel] = useState<"filters" | "rmp" | null>(null);
+
+  const sidebarProps = {
+    professors, selectedProfessor, setSelectedProfessor: handleProfessorClick,
+    years, selectedYear, selectedCourse, coursesToDisplay, setCoursesToDisplay,
+    setSelectedCourse: handleCourseClick, setSelectedYear, semesters,
+    selectedSemester, setSelectedSemester, finalFilteredCourses,
+    selectedSection, setSelectedSection, routeType, selectedItems, setSelectedItems,
+  };
+
   return (
-    <div className="min-h-screen w-full">
-      <div className="max-w-7xl mx-auto py-10">
-        <div className="flex justify-between items-center mb-8">
-          <IoHomeOutline
-            onClick={() => router.push("/")}
-            className="text-2xl cursor-pointer ml-4 mt-1 text-gray-300"
-            aria-label="Home"
-          />
-          <div
-            className="flex flex-col items-center cursor-pointer"
-            onClick={() => router.push("/")}
-          >
-            <h1 className="text-2xl font-montserrat">
-              <span className={`${poppins.className} font-bold text-gray-300`}>
-                MAV
-              </span>
-              <span
-                className={`${montserrat.className} font-normal text-gray-300`}
-              >
-                GRADES
-              </span>
-            </h1>
-          </div>
-          <BsQuestionCircle
-            className="text-2xl cursor-pointer mr-4 mt-1 text-gray-300"
-            onClick={() => router.push("/faq")}
-            aria-label="faq"
-          />
+    <div className="flex flex-col" style={{ height: "calc(100vh - 64px)" }}>
+      <InteractiveGridPattern
+        className={cn(
+          "[mask-image:radial-gradient(800px_circle_at_center,white,transparent)]",
+          "fixed inset-0 h-full w-full -z-10 opacity-20"
+        )}
+        squares={[75, 75]}
+      />
+
+      {/* Toolbar strip */}
+      <div className="shrink-0 border-b border-black/[0.06] dark:border-white/[0.06] px-4 md:px-6 py-4 flex items-center gap-3">
+        {/* Mobile: filter toggle */}
+        <button
+          className="md:hidden shrink-0 text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
+          onClick={() => setMobilePanel(mobilePanel === "filters" ? null : "filters")}
+        >
+          <SlidersHorizontal size={18} />
+        </button>
+
+        {/* Desktop breadcrumb */}
+        <div className="hidden md:flex w-64 shrink-0 items-center gap-2 text-sm min-w-0">
+          <button onClick={resetState} className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors whitespace-nowrap">
+            Search
+          </button>
+          {(course || professor) && (
+            <>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0e6aac] to-cyan-400 font-medium">/</span>
+              <span className="text-foreground font-medium truncate">{course || professor}</span>
+            </>
+          )}
         </div>
-        {/* SearchBar always at the top */}
-        <div className="text-white m-4">
+
+        {/* Search bar */}
+        <div className="flex-1 flex justify-center">
           <SearchBar
             initialValue={course || ""}
             resetState={resetState}
@@ -225,66 +228,79 @@ const ResultsContent = () => {
           />
         </div>
 
-        {loading ? (
-          <p className="text-white">Loading...</p>
-        ) : courses.length === 0 ? (
-          <p className="text-white">
-            No results found for &quot;{course || professor}&quot;. Please try
-            another search.
-          </p>
-        ) : (
-          <div className="flex flex-col lg:flex-row ml-4 mr-4">
-            {/* Sidebar */}
-            <SideBar
-              professors={professors}
-              selectedProfessor={selectedProfessor}
-              setSelectedProfessor={handleProfessorClick}
-              years={years}
-              selectedYear={selectedYear}
-              selectedCourse={selectedCourse}
-              coursesToDisplay={coursesToDisplay}
-              setCoursesToDisplay={setCoursesToDisplay}
-              setSelectedCourse={handleCourseClick}
-              setSelectedYear={setSelectedYear}
-              semesters={semesters}
-              selectedSemester={selectedSemester}
-              setSelectedSemester={setSelectedSemester}
-              finalFilteredCourses={finalFilteredCourses}
-              selectedSection={selectedSection}
-              setSelectedSection={setSelectedSection}
-              routeType={routeType}
-              selectedItems={selectedItems}
-              setSelectedItems={setSelectedItems}
-            />
+        {/* Desktop spacer */}
+        <div className="hidden md:block w-64 shrink-0" />
 
-            {/* Right content area */}
+        {/* Mobile: RMP toggle */}
+        {showRMP && (
+          <button
+            className="md:hidden shrink-0 text-xs font-medium text-transparent bg-clip-text bg-gradient-to-r from-[#0e6aac] to-cyan-400"
+            onClick={() => setMobilePanel(mobilePanel === "rmp" ? null : "rmp")}
+          >
+            RMP
+          </button>
+        )}
+      </div>
+
+      {loading ? (
+        <p className="text-foreground p-8">Loading...</p>
+      ) : courses.length === 0 ? (
+        <p className="text-foreground p-8">
+          No results found for &quot;{course || professor}&quot;. Please try another search.
+        </p>
+      ) : (
+        <div className="flex flex-1 min-h-0 relative">
+
+          {/* Mobile slide-in panel */}
+          {mobilePanel && (
+            <div className="md:hidden absolute inset-0 z-30 bg-background overflow-y-auto p-5">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-sm font-semibold text-foreground">
+                  {mobilePanel === "filters" ? "Filters" : "Rate My Professor"}
+                </span>
+                <button onClick={() => setMobilePanel(null)} className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white">
+                  <X size={18} />
+                </button>
+              </div>
+              {mobilePanel === "filters" ? (
+                <SideBar {...sidebarProps} />
+              ) : (
+                showRMP && <ProfessorRating professorName={selectedProfessor!} />
+              )}
+            </div>
+          )}
+
+          {/* Left: filter panel — desktop only */}
+          <aside className="hidden md:block w-64 shrink-0 overflow-y-auto border-r border-black/[0.06] dark:border-white/[0.06] p-6">
+            <SideBar {...sidebarProps} />
+          </aside>
+
+          {/* Center: main stats */}
+          <main className="flex-1 overflow-y-auto p-4 md:p-6">
             <StatsCard
               selectedItems={
                 selectedItems.size > 0
                   ? selectedItems
-                  : new Map([["selectedProfessor", selectedSection]])
+                  : new Map([["selectedSection", selectedSection]])
               }
-              selectedProfessor={selectedProfessor}
             />
-          </div>
-        )}
-      </div>
-      <div className="bottom-0 left-0 right-0 text-center text-xs text-gray-400 p-4">
-        Developed by{" "}
-        <a
-          href="https://github.com/acmuta/mavgrades"
-          target="_blank"
-          className="hover:underline"
-        >
-          ACM @ UTA
-        </a>
-        . Not affiliated with or sponsored by UT Arlington.
-        <br />© 2025{" "}
-        <a href="https://acmuta.com" className="hover:underline">
-          ACM @ UT Arlington
-        </a>
-        . All rights reserved.
-      </div>
+          </main>
+
+          {/* Right: RMP panel — desktop only */}
+          <aside className="hidden md:block w-64 shrink-0 overflow-y-auto border-l border-black/[0.06] dark:border-white/[0.06] p-6">
+            {showRMP ? (
+              <ProfessorRating professorName={selectedProfessor!} />
+            ) : (
+              <div className="flex items-start justify-center pt-10">
+                <p className="text-xs text-gray-500 dark:text-gray-600 text-center">
+                  {isComparingMode ? "RMP unavailable in compare mode" : "Select a professor to see ratings"}
+                </p>
+              </div>
+            )}
+          </aside>
+
+        </div>
+      )}
     </div>
   );
 };

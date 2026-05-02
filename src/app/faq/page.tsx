@@ -1,7 +1,6 @@
 'use client';
 import FAQDropdown from "../components/FAQDropdown";
 import { Poppins, Montserrat } from "next/font/google";
-import { IoHomeOutline } from "react-icons/io5";
 const poppins = Poppins({
     subsets: ["latin"],
     weight: ["400", "700"],
@@ -55,13 +54,6 @@ const FAQs = [
 const FAQPage = () => {
     return (
       <div className="max-w-2xl mx-auto p-6">
-        <div className="absolute top-6 left-30 flex justify-between items-center mb-8">
-            <IoHomeOutline
-              onClick={() => (window.location.href = "/")}
-              className="text-2xl cursor-pointer ml-4 mt-1 text-gray-300"
-              aria-label="Home"
-            />
-        </div>
         <div>
             <div className="flex flex-col items-center w-full mb-10 ">
               <h1 className="text-2xl font-montserrat text-center">

@@ -8,9 +8,10 @@ interface ToggleSwitchProps {
 const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ isEnabled, onToggle }) => {
   return (
     <div
-      className={`lg:mt-1 relative inline-flex items-center cursor-pointer ${
-        isEnabled ? "bg-green-500" : "bg-gray-300"
-      } rounded-full w-11 h-5`}
+      className={`lg:mt-1 relative inline-flex items-center cursor-pointer rounded-full w-11 h-5 transition-colors ${
+        isEnabled ? "" : "bg-gray-600"
+      }`}
+      style={isEnabled ? { background: "linear-gradient(to right, #0e6aac, #22d3ee)" } : {}}
       onClick={() => onToggle(!isEnabled)}
     >
       <span

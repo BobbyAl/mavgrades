@@ -3,41 +3,48 @@
   @tailwind utilities;
 
   @layer base {
+    /* Light mode (default) */
     :root {
-      --background: 0 0% 100%;
-      --foreground: 240 10% 3.9%;
+      --background: 0 0% 98%;
+      --foreground: 240 10% 8%;
+
+      --surface: 0 0% 100%;
+      --surface-raised: 0 0% 95%;
 
       --card: 0 0% 100%;
-      --card-foreground: 240 10% 3.9%;
+      --card-foreground: 240 10% 8%;
 
       --popover: 0 0% 100%;
-      --popover-foreground: 240 10% 3.9%;
+      --popover-foreground: 240 10% 8%;
 
       --primary: 240 5.9% 10%;
       --primary-foreground: 0 0% 98%;
 
-      --secondary: 240 4.8% 95.9%;
+      --secondary: 240 4.8% 92%;
       --secondary-foreground: 240 5.9% 10%;
 
-      --muted: 240 4.8% 95.9%;
-      --muted-foreground: 240 3.8% 46.1%;
+      --muted: 240 4.8% 92%;
+      --muted-foreground: 240 3.8% 40%;
 
-      --accent: 240 4.8% 95.9%;
+      --accent: 240 4.8% 92%;
       --accent-foreground: 240 5.9% 10%;
 
       --destructive: 0 84.2% 60.2%;
       --destructive-foreground: 0 0% 98%;
 
-      --border: 240 5.9% 90%;
-      --input: 240 5.9% 90%;
+      --border: 240 5.9% 82%;
+      --input: 240 5.9% 82%;
       --ring: 240 10% 3.9%;
-
       --radius: 0.5rem;
     }
 
+    /* Dark mode */
     .dark {
       --background: 240 10% 3.9%;
       --foreground: 0 0% 98%;
+
+      --surface: 240 10% 5%;
+      --surface-raised: 240 8% 8%;
 
       --card: 240 10% 3.9%;
       --card-foreground: 0 0% 98%;
@@ -63,6 +70,9 @@
       --border: 240 3.7% 15.9%;
       --input: 240 3.7% 15.9%;
       --ring: 240 4.9% 83.9%;
+    }
+  .theme {
+        --animate-orbit: orbit calc(var(--duration)*1s) linear infinite;
     }
   }
 
@@ -101,7 +111,6 @@
   }
 }
 
-
 html {
   scrollbar-width: thin;
   scrollbar-color: white black;
@@ -112,3 +121,13 @@ html {
   border-radius: 3px; /* Rounded corners for thumb */
 }
 
+@theme inline {
+  @keyframes orbit {
+  0% {
+    transform: rotate(calc(var(--angle) * 1deg)) translateY(calc(var(--radius) * 1px)) rotate(calc(var(--angle) * -1deg));
+        }
+  100% {
+    transform: rotate(calc(var(--angle) * 1deg + 360deg)) translateY(calc(var(--radius) * 1px)) rotate(calc((var(--angle) * -1deg) - 360deg));
+        }
+    }
+}

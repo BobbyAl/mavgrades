@@ -13,6 +13,7 @@ import {
    Legend,
    ChartData,
 } from "chart.js";
+import ChartDataLabels from "chartjs-plugin-datalabels";
 
 ChartJS.register(
    CategoryScale,
@@ -20,48 +21,49 @@ ChartJS.register(
    BarElement,
    ChartTitle,
    Tooltip,
-   Legend
+   Legend,
+   ChartDataLabels
 );
 
-// Define the props type for the BarChart component
 interface BarChartProps {
    grades: Course[];
-   colors: string[]; // Array of colors for each dataset
+   colors: string[];
 }
 
+const gradeColors: { [key: string]: string } = {
+   A: "#4ade80",
+   B: "#60a5fa",
+   C: "#facc15",
+   D: "#fb923c",
+   P: "#34d399",
+   I: "#a78bfa",
+   F: "#f87171",
+   Q: "#94a3b8",
+   W: "#94a3b8",
+   Z: "#94a3b8",
+   R: "#94a3b8",
+};
+
 const BarChart: React.FC<BarChartProps> = ({ grades, colors }) => {
-   // Check if grades or colors are null or empty
    if (!grades || grades.length === 0 || !colors || colors.length === 0) {
-      return null; // Do not render anything
+      return null;
    }
-   // console.log(`grades: ${JSON.stringify(grades)}`);
-   // Map Tailwind CSS classes to hex codes if needed
-   const tailwindColors: { [key: string]: string } = {
-      "border-t-blue-400": "#60A5FA",
-      "border-t-green-400": "#34D399",
-      "border-t-orange-400": "#FBBF24",
-      "border-t-teal-400": "#2DD4BF",
-      "border-t-rose-400": "#FB7185",
-      "border-t-yellow-400": "#FDE047",
-      // Add more mappings if necessary
-   };
 
-   // Prepare the grade data and labels
    const gradeLabels = ["A", "B", "C", "D", "P", "I", "F", "Q", "W", "Z", "R"];
+   const multiProfessor = grades.length > 1;
 
-   // Create datasets for each course selection
    const datasets = grades.map((course, index) => {
-      // Determine the color for this dataset
-      const colorKey = colors[index % colors.length];
-      const backgroundColor = tailwindColors[colorKey] || colorKey || "#57D2DD"; // Fallback to #57D2DD if color not found
+      const multiColor = colors[index % colors.length] || "#57D2DD";
 
       if (!course) {
          return {
-            label: `Professor ${index + 1}`, // Fallback label for null courses
-            data: new Array(gradeLabels.length).fill(0), // Default to an array of zeros
-            backgroundColor,
+            label: `Professor ${index + 1}`,
+            data: new Array(gradeLabels.length).fill(0),
+            backgroundColor: multiProfessor
+               ? multiColor
+               : gradeLabels.map((g) => gradeColors[g] ?? "#94a3b8"),
             borderRadius: 7,
-            borderSkipped: "bottom" as const, // Only round the top corners
+            borderSkipped: "bottom" as const,
          };
       }
 
@@ -82,30 +84,30 @@ const BarChart: React.FC<BarChartProps> = ({ grades, colors }) => {
       return {
          label: `${course.instructor1}`,
          data: gradeValues,
-         backgroundColor,
+         backgroundColor: multiProfessor
+            ? multiColor
+            : gradeLabels.map((g) => gradeColors[g] ?? "#94a3b8"),
          borderRadius: 7,
-         borderSkipped: "bottom" as const, // Only round the top corners
+         borderSkipped: "bottom" as const,
       };
    });
 
-   // Filter labels and datasets to only include those with non-zero values
    const nonZeroIndices = gradeLabels.reduce(
-      (indices: number[], label, index) => {
-         const hasNonZeroData = datasets.some(
-            (dataset) => dataset.data[index] > 0
-         );
-         if (hasNonZeroData) {
-            indices.push(index);
-         }
+      (indices: number[], _label, index) => {
+         const hasNonZeroData = datasets.some((dataset) => dataset.data[index] > 0);
+         if (hasNonZeroData) indices.push(index);
          return indices;
       },
       []
    );
 
    const filteredLabels = nonZeroIndices.map((index) => gradeLabels[index]);
-   const filteredDatasets = datasets.map((dataset) => ({
+   const filteredDatasets = datasets.map((dataset, i) => ({
       ...dataset,
       data: nonZeroIndices.map((index) => dataset.data[index]),
+      backgroundColor: multiProfessor
+         ? (colors[i % colors.length] || "#57D2DD")
+         : filteredLabels.map((g) => gradeColors[g] ?? "#94a3b8"),
    }));
 
    const data: ChartData<"bar", number[], string> = {
@@ -113,105 +115,65 @@ const BarChart: React.FC<BarChartProps> = ({ grades, colors }) => {
       datasets: filteredDatasets,
    };
 
-   // Formatting the chart
    const options: ChartOptions<"bar"> = {
       responsive: true,
       scales: {
          x: {
-            ticks: {
-               color: "white", // X-axis labels
-               font: {
-                  size: 14,
-               },
-            },
-            grid: {
-               color: "rgba(255, 255, 255, 0.2)", // X-axis grid lines
-            },
+            ticks: { color: "white", font: { size: 13 } },
+            grid: { color: "rgba(255, 255, 255, 0.06)" },
          },
          y: {
             ticks: {
-               color: "white", // Y-axis labels
-               font: {
-                  size: 14,
-               },
-               callback: function(value) {
-                  return value + '%'; // Add '%' symbol to each y-axis tick
-               },
+               color: "white",
+               font: { size: 13 },
+               callback: (value) => value + "%",
             },
-            grid: {
-               color: "rgba(255, 255, 255, 0.2)", // Y-axis grid lines
-            },
+            grid: { color: "rgba(255, 255, 255, 0.06)" },
          },
       },
       plugins: {
          legend: {
-            labels: {
-               color: "white", // Legend text color
-               font: {
-                  size: 14, // Legend font size
-               },
-            },
+            display: multiProfessor,
+            labels: { color: "white", font: { size: 13 } },
+         },
+         datalabels: {
+            display: !multiProfessor,
+            anchor: "end",
+            align: "end",
+            offset: 2,
+            color: "rgba(255,255,255,0.55)",
+            font: { size: 11, weight: "bold" },
+            formatter: (value: number) => value > 0 ? `${Math.round(value)}%` : "",
          },
          tooltip: {
             titleColor: "white",
             bodyColor: "white",
-            backgroundColor: "rgba(0, 0, 0, 0.7)", // Dark background for tooltips
+            backgroundColor: "rgba(0,0,0,0.8)",
             callbacks: {
-               title: () => {
-                  return ''; // Return an empty string to make the label blank
-               },
-               label: () => {
-                  return ''; // Return an empty string to make the label blank
-               },
-               // Displays the raw student count for rach letter grade
+               title: () => "",
+               label: () => "",
                footer: (tooltipItems) => {
                   const datasetIndex = tooltipItems[0].datasetIndex;
-                  const course = grades[datasetIndex] as Course; // Assert the type
-      
-                  if (!course) {
-                      return; // Handle the case where the course might be null
-                  }
-      
-                  // Define the grade label to access the correct property
-                  const gradeLabel = tooltipItems[0].label; // This should correspond to 'A', 'B', etc.
-                  const gradeCount = course[`grades_${gradeLabel}` as keyof Course] || 0; // Access dynamically
-      
-                  return `# of Students: ${gradeCount}`; // Display the raw grade count
-              },
+                  const course = grades[datasetIndex] as Course;
+                  if (!course) return;
+                  const gradeLabel = tooltipItems[0].label;
+                  const gradeCount = course[`grades_${gradeLabel}` as keyof Course] || 0;
+                  const pct = ((Number(gradeCount) / course.grades_count) * 100).toFixed(1);
+                  return [`${gradeCount} students`, `${pct}%`];
+               },
             },
          },
       },
    };
-   return grades && grades.length > 0 ? (
-      <div className="mt-8 bg-gray-200 bg-opacity-10 rounded-lg p-4">
-         <h2
-            className={`text-xl text-center font-bold mb-2 ${
-               grades.length === 1
-                  ? "text-blue-400" // Solid color for one course
-                  : "text-transparent bg-clip-text " + 
-                  (grades.length === 2
-                     ? "bg-gradient-to-r from-blue-400 to-green-400" // Gradient for two courses
-                     : "bg-gradient-to-r from-blue-400 via-green-400 to-yellow-400") // Gradient for three courses
-            }`}
-         >
+
+   return (
+      <div className="mt-2 rounded-xl p-5 border border-black/[0.07] dark:border-white/[0.07] bg-white dark:bg-[#0d0d0f]">
+         <h2 className="text-sm font-semibold text-center text-gray-900 dark:text-white mb-4 tracking-widest uppercase">
             Grades Distribution
          </h2>
-      <div
-      className={`rounded w-1/2 mx-auto mb-4 px-10`}
-      style={{
-         backgroundImage:
-            grades.length === 1
-               ? `none` // No gradient if there's only one course
-               : grades.length === 2
-               ? `linear-gradient(to right, #60A5FA, #34D399)` // Gradient for two courses
-               : `linear-gradient(to right, #60A5FA, #34D399, #FBBF24)`, // Gradient for three courses
-            backgroundColor: grades.length === 1 ? "#60A5FA" : undefined, // Solid color for one course
-         height: '4px', 
-      }}
-   ></div>
-      <Bar data={data} options={options} />
-   </div>
-   ) : null;
+         <Bar data={data} options={options} />
+      </div>
+   );
 };
 
 export default BarChart;

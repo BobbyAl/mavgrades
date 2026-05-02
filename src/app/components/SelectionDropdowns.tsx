@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 
-// TODO: import this from SideBar.tsx
 interface SelectionDropdownsProps {
    selectedProfessor: string;
    selectedCourseSubject: string | null;
@@ -36,6 +35,28 @@ interface SelectionDropdownsProps {
    semesters: string[];
 }
 
+const Pill = ({
+   label,
+   selected,
+   onClick,
+}: {
+   label: string;
+   selected: boolean;
+   onClick: () => void;
+}) => (
+   <button
+      type="button"
+      onClick={onClick}
+      className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+         selected
+            ? "bg-white text-black border-white"
+            : "bg-transparent text-gray-500 dark:text-gray-400 border-black/20 dark:border-white/20 hover:border-black/50 dark:hover:border-white/50 hover:text-black dark:hover:text-white"
+      }`}
+   >
+      {label}
+   </button>
+);
+
 const SelectionDropdowns: React.FC<SelectionDropdownsProps> = ({
    selectedProfessor,
    selectedCourseSubject,
@@ -50,7 +71,6 @@ const SelectionDropdowns: React.FC<SelectionDropdownsProps> = ({
    years,
    semesters,
 }) => {
-   // Set the latest year and semester when the professor or course changes
    useEffect(() => {
       const courseMatches = finalFilteredCourses.filter(
          (course) =>
@@ -58,16 +78,12 @@ const SelectionDropdowns: React.FC<SelectionDropdownsProps> = ({
       );
 
       if (courseMatches.length > 0) {
-         // Sort courses to find the latest year and semester
          const sortedCourses = [...courseMatches].sort(
             (a, b) =>
                parseInt(b.year) - parseInt(a.year) ||
                semesters.indexOf(b.semester) - semesters.indexOf(a.semester)
          );
-
          const latestCourse = sortedCourses[0];
-
-         // Only set year, semester, and section if not already set
          if (!selectedYear) setSelectedYear(latestCourse.year);
          if (!selectedSemester) setSelectedSemester(latestCourse.semester);
          if (!selectedSection) setSelectedSection(latestCourse);
@@ -84,120 +100,73 @@ const SelectionDropdowns: React.FC<SelectionDropdownsProps> = ({
       setSelectedSemester,
       setSelectedSection,
    ]);
+
+   const [subjectId, courseNumber] = selectedCourse.split(" ");
+
+   const sections = finalFilteredCourses.filter(
+      (course) =>
+         course.subject_id === subjectId &&
+         course.course_number === courseNumber &&
+         course.year === selectedYear &&
+         course.semester === selectedSemester &&
+         (selectedCourseSubject ? course.subject_id === selectedCourseSubject : true)
+   );
+
    return (
-      <div>
-         <h2 className="text-l text-center text-white font-bold mb-4">
-            {`Sections for Professor: ${selectedProfessor}`}
-         </h2>
-         <div className="border-b-2 rounded border-gray-400 mx-auto mb-4 px-10"></div>{" "}
-         {/* Year Dropdown */}
-         <div className="mb-4">
-            <label
-               htmlFor="year"
-               className="text-white block font-semibold mb-1"
-            >
-               Select Year:
-            </label>
-            <select
-               id="year"
-               value={selectedYear || ""}
-               onChange={(e) => {
-                  setSelectedYear(e.target.value);
-                  setSelectedSection(null);
-                  setSelectedSemester(null);
-               }}
-               className="border border-gray-400 bg-gray-700 bg-opacity-50 text-white p-2 rounded-lg w-full"
-            >
-               <option value="" disabled>
-                  Select a year
-               </option>
-               {years.map((year, index) => (
-                  <option key={index} value={year}>
-                     {year}
-                  </option>
+      <div className="flex flex-col gap-3 pt-1">
+         {/* Year */}
+         <div>
+            <p className="text-xs uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Year</p>
+            <div className="flex flex-wrap gap-1.5">
+               {years.map((year) => (
+                  <Pill
+                     key={year}
+                     label={year}
+                     selected={selectedYear === year}
+                     onClick={() => {
+                        setSelectedYear(year);
+                        setSelectedSemester(null);
+                        setSelectedSection(null);
+                     }}
+                  />
                ))}
-            </select>
+            </div>
          </div>
-         {/* Semester Dropdown */}
-         <div className="mb-4">
-            <label
-               htmlFor="semester"
-               className="text-white block font-semibold mb-1"
-            >
-               Select Semester:
-            </label>
-            <select
-               id="semester"
-               value={selectedSemester || ""}
-               onChange={(e) => {
-                  setSelectedSemester(e.target.value);
-                  setSelectedSection(null);
-               }}
-               className="border border-gray-400 bg-gray-700 bg-opacity-50 text-white p-2 rounded-lg w-full"
-               disabled={!selectedYear} // Disable if selectedYear is not set
-            >
-               <option value="" disabled>
-                  Select a semester
-               </option>
-               {semesters.map((semester, index) => (
-                  <option key={index} value={semester}>
-                     {semester}
-                  </option>
-               ))}
-            </select>
-         </div>
-         {/* Section List */}
-         {selectedYear && selectedSemester && (
-            <div className="mb-4">
-               <label
-                  htmlFor="sectionDropdown"
-                  className="block text-white font-semibold mb-1"
-               >
-                  Select Section:
-               </label>
-               <select
-                  id="sectionDropdown"
-                  value={selectedSection?.section_number || ""}
-                  onChange={(e) => {
-                     const selectedSectionNumber = e.target.value;
-                     const selectedCourse = finalFilteredCourses.filter((course) =>
-                        selectedCourseSubject ? course.subject_id === selectedCourseSubject : true
-                     )
-                     // const selectedCourse = finalFilteredCourses
-                     .find(
-                        (course) =>
-                           course.section_number === selectedSectionNumber &&
-                           course.year === selectedYear &&
-                           course.semester === selectedSemester
-                     );
-                     setSelectedSection(selectedCourse || null); // Set the selected section
-                  }}
-                  className="border border-gray-400 bg-gray-700 bg-opacity-50 text-white p-2 rounded-lg w-full"
-               >
-                  <option value="" disabled>
-                     -- Select a section --
-                  </option>
-                  {finalFilteredCourses
-                     .filter((course) => {
-                        const [subjectId, courseNumber] =
-                           selectedCourse.split(" ");
-                        return (
-                           course.subject_id === subjectId &&
-                           course.course_number === courseNumber &&
-                           course.year === selectedYear &&
-                           course.semester === selectedSemester
-                        );
-                     })
-                     .map((course) => (
-                        <option
-                           key={course.section_number}
-                           value={course.section_number}
-                        >
-                           {course.semester} {course.year} Section:{" "}
-                           {course.section_number}
-                        </option>
-                     ))}
-               </select>
+
+         {/* Semester */}
+         {selectedYear && (
+            <div>
+               <p className="text-xs uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Semester</p>
+               <div className="flex flex-wrap gap-1.5">
+                  {semesters.map((sem) => (
+                     <Pill
+                        key={sem}
+                        label={sem}
+                        selected={selectedSemester === sem}
+                        onClick={() => {
+                           setSelectedSemester(sem);
+                           setSelectedSection(null);
+                        }}
+                     />
+                  ))}
+               </div>
+            </div>
+         )}
+
+         {/* Section */}
+         {selectedYear && selectedSemester && sections.length > 0 && (
+            <div>
+               <p className="text-xs uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Section</p>
+               <div className="flex flex-wrap gap-1.5">
+                  {sections.map((course) => (
+                     <Pill
+                        key={course.section_number}
+                        label={course.section_number}
+                        selected={selectedSection?.section_number === course.section_number}
+                        onClick={() => setSelectedSection(course)}
+                     />
+                  ))}
+               </div>
             </div>
          )}
       </div>

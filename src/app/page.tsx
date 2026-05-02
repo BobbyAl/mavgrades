@@ -1,14 +1,12 @@
 import Head from "next/head";
 import { Poppins, Montserrat } from "next/font/google";
 import SearchBar from "./components/SearchBar";
-import Notification from "./components/Notification";
-import { BsQuestionCircle } from "react-icons/bs";
-import Link from "next/link";
-
+import { InteractiveGridPattern } from "./components/interactive-grid-pattern";
+import { cn } from "@/lib/utils";
 
 const poppins = Poppins({
   subsets: ["latin"],
-  weight: ["400", "700"], // Specify weights you need
+  weight: ["400", "700"],
   variable: "--font-poppins",
 });
 
@@ -18,67 +16,51 @@ const montserrat = Montserrat({
   variable: "--font-montserrat",
 });
 
+const popularSearches = ["CSE 3310", "MATH 1426", "Barry Spurlock", "PHYS 1443"];
+
 export default function Home() {
   return (
-    <>
-      <Notification />
-      <div className="flex flex-col items-center justify-center min-h-screen text-white px-4 lg:px-24">
-        <Head>
-          <title>MavGrades</title>
-        </Head>
+    <div className="relative flex items-center justify-center min-h-[calc(100vh-64px)] overflow-hidden">
+      <Head>
+        <title>MavGrades</title>
+      </Head>
 
-        <div className="w-full max-w-5xl flex flex-col lg:flex-row justify-between items-center h-full">
-          <div className="lg:w-1/2 flex flex-col items-center lg:items-start text-center lg:text-start mb-8 lg:mb-0">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl tracking-wide">
-              <span
-                className={`${poppins.className} font-extrabold text-gray-300`}
-              >
-                MAV
-              </span>
-              <span
-                className={`${montserrat.className} font-light text-gray-300`}
-              >
-                GRADES
-              </span>
-            </h1>
-            <p className="text-sm sm:text-base lg:text-lg text-gray-200 mt-4 max-w-md mx-auto lg:mx-0">
-              Learn from your previous peers. See how they did! It&apos;s free
-              and accessible for all UTA students.
-            </p>
-          </div>
+      <InteractiveGridPattern
+        className={cn(
+          "[mask-image:radial-gradient(600px_circle_at_center,white,transparent)]",
+          "absolute inset-0 h-full w-full -z-10 opacity-30"
+        )}
+        squares={[75, 75]}
+      />
 
-          <div className="lg:w-1/2 flex flex-col items-center lg:items-center">
-            <div className="w-full max-w-md">
-              <SearchBar />
-            </div>
-            <p className="mt-8 text-sm text-gray-300 justify-center">
-              Enjoy your course registration experience!
-            </p>
-          </div>
-          <Link href="/faq" aria-label="faq">
-            <BsQuestionCircle
-              className="fixed top-10 right-10 text-2xl cursor-pointer mr-4 mt-1 text-gray-300"
-            />
-          </Link>
+      <div className="w-full max-w-2xl flex flex-col items-center gap-4 text-center px-4 -mt-16">
+
+        {/* Badge */}
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md border border-black/[0.12] dark:border-white/[0.12] bg-black/[0.04] dark:bg-white/[0.04] backdrop-blur-sm text-[10px] sm:text-xs text-gray-500 dark:text-white/50 text-center">
+          <span className="w-1.5 h-1.5 rounded-full bg-gray-400 dark:bg-gray-300 inline-block" />
+          Now updated with Spring 2025 data
         </div>
 
-        <div className="absolute bottom-4 left-0 right-0 text-center text-xs text-gray-400">
-          Developed by{" "}
-          <a
-            href="https://github.com/acmuta/mavgrades"
-            target="_blank"
-            className="hover:underline"
-          >
-            ACM @ UTA
-          </a>
-          . Not affiliated with or sponsored by UT Arlington.
-          <br />© 2025{" "}
-          <a href="https://acmuta.com" className="hover:underline">
-            ACM @ UT Arlington
-          </a>
-          . All rights reserved.
+        {/* Wordmark */}
+        <h1 className="text-4xl sm:text-6xl lg:text-7xl xl:text-8xl tracking-wide leading-none">
+          <span className={`${poppins.className} font-extrabold text-gray-800 dark:text-gray-200`}>MAV</span>
+          <span className={`${montserrat.className} font-light text-transparent bg-clip-text bg-gradient-to-r from-[#0e6aac] to-cyan-400`}>GRADES</span>
+        </h1>
+
+        {/* Tagline */}
+        <p className="text-sm sm:text-base lg:text-lg text-gray-500 max-w-md leading-relaxed px-2">
+          Official UTA grade distributions for every course and professor — before you enroll.
+        </p>
+
+        {/* Search */}
+        <div className="w-full mt-2 flex flex-col items-center">
+          <SearchBar />
+          <p className="mt-3 text-xs sm:text-sm text-gray-600 px-4 leading-relaxed">
+            Try: {popularSearches.join(" · ")}
+          </p>
         </div>
+
       </div>
-    </>
+    </div>
   );
 }

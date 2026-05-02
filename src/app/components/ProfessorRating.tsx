@@ -23,9 +23,7 @@ const ProfessorRating: React.FC<ProfessorRatingProps> = ({ professorName }) => {
   useEffect(() => {
     const fetchProfessorRating = async () => {
       try {
-        const response = await fetch(
-          `/api/professor-rating?name=${encodeURIComponent(professorName)}`
-        );
+        const response = await fetch(`/api/professor-rating?name=${encodeURIComponent(professorName)}`);
         const data = await response.json();
         setRatingData(data);
       } catch (error) {
@@ -34,15 +32,14 @@ const ProfessorRating: React.FC<ProfessorRatingProps> = ({ professorName }) => {
         setLoading(false);
       }
     };
-
     fetchProfessorRating();
   }, [professorName]);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-32">
-        <Loader2 className="animate-spin h-8 w-8 text-blue-500 mr-3" />
-        <span className="text-lg text-white">Loading professor rating…</span>
+        <Loader2 className="animate-spin h-5 w-5 text-gray-500 dark:text-gray-600 mr-2" />
+        <span className="text-sm text-gray-500 dark:text-gray-600">Loading professor rating…</span>
       </div>
     );
   }
@@ -50,84 +47,56 @@ const ProfessorRating: React.FC<ProfessorRatingProps> = ({ professorName }) => {
   if (!ratingData) {
     return (
       <div className="flex flex-col items-center justify-center h-32 text-center">
-        <AlertCircle className="h-8 w-8 text-gray-400 mb-2" />
-        <span className="text-white">
-          No RateMyProfessor data found for this instructor.
-        </span>
+        <AlertCircle className="h-5 w-5 text-gray-500 dark:text-gray-600 mb-2" />
+        <span className="text-sm text-gray-500 dark:text-gray-600">No RateMyProfessor data found for this instructor.</span>
       </div>
     );
   }
 
   return (
-    <div className="bg-gray-200 bg-opacity-10 p-6 rounded-lg text-white relative">
-      <h3 className="text-2xl text-center font-bold mb-2">
-        Professor Ratings{" "}
-        <span>
-          (
-          <a
-            href={ratingData.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-500 hover:underline"
-          >
-            RMP
+    <div className="flex flex-col gap-4 text-gray-900 dark:text-white">
+      {/* Header */}
+      <div>
+        <div className="flex items-center justify-between mb-0.5">
+          <span className="text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">Rate My Professor</span>
+          <a href={ratingData.url} target="_blank" rel="noopener noreferrer" className="text-[10px] font-medium text-transparent bg-clip-text bg-gradient-to-r from-[#0e6aac] to-cyan-400 hover:opacity-80 transition-opacity">
+            View →
           </a>
-          )
-        </span>
-      </h3>
-      <div className="border-b-2 rounded border-gray-500 w-1/2 mx-auto mb-4 px-10"></div>
-
-      {/* Last updated button */}
-      <button
-        className="absolute top-4 right-4 text-xs text-gray-300 p-2 rounded-full flex items-center gap-2"
-        title="Last updated"
-      >
-        <span>Last updated May 8, 2025</span>
-      </button>
-
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div className="flex flex-col bg-gray-200 bg-opacity-10 p-3 gap-2 rounded-lg font-bold drop-shadow-lg border-t-4 border-t-blue-400">
-          <h4 className="text-white text-xs sm:text-base uppercase font-semibold">
-            Quality Rating
-          </h4>
-          <p className="text-2xl text-blue-400">{ratingData.quality_rating}</p>
         </div>
-        <div className="flex flex-col bg-gray-200 bg-opacity-10 p-3 gap-2 rounded-lg font-bold drop-shadow-lg border-t-4 border-t-green-400">
-          <h4 className="text-white text-xs sm:text-base uppercase font-semibold">
-            Difficulty Rating
-          </h4>
-          <p className="text-2xl text-green-400">
-            {ratingData.difficulty_rating}
-          </p>
-        </div>
-        <div className="flex flex-col bg-gray-200 bg-opacity-10 p-3 gap-2 rounded-lg font-bold drop-shadow-lg border-t-4 border-t-orange-400">
-          <h4 className="text-white text-xs sm:text-base uppercase font-semibold">
-            Would Take Again
-          </h4>
-          <p className="text-2xl text-orange-400">
-            {ratingData.would_take_again}
-          </p>
-        </div>
-        <div className="flex flex-col bg-gray-200 bg-opacity-10 p-3 gap-2 rounded-lg font-bold drop-shadow-lg border-t-4 border-t-teal-400">
-          <h4 className="text-white text-xs sm:text-base uppercase font-semibold">
-            Total Ratings
-          </h4>
-          <p className="text-2xl text-teal-400">{ratingData.total_ratings}</p>
-        </div>
+        <p className="text-sm font-semibold text-gray-900 dark:text-white">{ratingData.rmp_name}</p>
+        {ratingData.department && (
+          <p className="text-xs text-gray-500 dark:text-gray-400">{ratingData.department}</p>
+        )}
       </div>
-      <div className="flex flex-col">
-        <h4 className="text-xl uppercase font-semibold mb-2">Tags:</h4>
-        <div className="flex gap-2 flex-wrap">
+
+      {/* Stats */}
+      <div className="flex flex-col gap-2">
+        {[
+          { label: "Quality", value: ratingData.quality_rating },
+          { label: "Difficulty", value: ratingData.difficulty_rating },
+          { label: "Would Take Again", value: ratingData.would_take_again },
+          { label: "Total Ratings", value: ratingData.total_ratings },
+        ].map(({ label, value }) => (
+          <div key={label} className="flex items-center justify-between p-3 rounded-lg bg-gray-100 dark:bg-[#111113] border border-black/[0.06] dark:border-white/[0.06]">
+            <span className="text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">{label}</span>
+            <span className="text-base font-semibold text-gray-900 dark:text-white">{value}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Tags */}
+      {ratingData.tags && (
+        <div className="flex flex-wrap gap-1.5">
           {ratingData.tags.split(", ").map((tag, index) => (
             <span
               key={index}
-              className="bg-gray-200 bg-opacity-20 text-md px-2 py-1 rounded-md font-medium capitalize"
+              className="px-2 py-0.5 rounded-md bg-white/[0.04] border border-white/[0.07] text-xs text-gray-500 dark:text-gray-400"
             >
               {tag}
             </span>
           ))}
         </div>
-      </div>
+      )}
     </div>
   );
 };

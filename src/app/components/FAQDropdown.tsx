@@ -15,7 +15,7 @@ const FAQDropdown: React.FC<FAQDropdownProps> = ({ question, answer }) => {
    return (
       <div className="border-gray-200">
          <button
-            className={`flex justify-between items-center w-full py-4 text-left text-white focus:outline-none bg-gray-200 ${
+            className={`flex justify-between items-center w-full py-4 text-left text-gray-900 dark:text-white focus:outline-none bg-gray-200 dark:bg-gray-200 ${
                isOpen ? "bg-opacity-40" : "bg-opacity-20"
             } rounded-t-lg hover:bg-opacity-40 transition-all duration-200 ${
                isOpen ? "" : "rounded-b-lg"
@@ -32,7 +32,7 @@ const FAQDropdown: React.FC<FAQDropdownProps> = ({ question, answer }) => {
             </span>
          </button>
          {isOpen && (
-            <div className="py-2 text-white bg-gray-200 bg-opacity-20 rounded-b-lg">
+            <div className="py-2 text-gray-900 dark:text-white bg-gray-200 bg-opacity-20 rounded-b-lg">
                <div
                   className="ml-5 mr-5"
                   dangerouslySetInnerHTML={{ __html: answer }}
